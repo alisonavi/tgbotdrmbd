@@ -2,6 +2,7 @@ import logging
 import os
 import random
 from collections import defaultdict, Counter
+from datetime import datetime, time
 from telegram import Update
 from telegram.ext import (
     ApplicationBuilder,
@@ -9,8 +10,8 @@ from telegram.ext import (
     MessageHandler,
     CommandHandler,
     filters,
+    JobQueue
 )
-from datetime import datetime, time, timedelta
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -59,6 +60,7 @@ async def top_messages(update: Update, context: ContextTypes.DEFAULT_TYPE):
         identifier = context.args[0].lstrip('@')
         user_id = None
 
+        # Try to interpret identifier as an integer user_id
         try:
             identifier_int = int(identifier)
             if identifier_int in user_messages:
@@ -66,6 +68,7 @@ async def top_messages(update: Update, context: ContextTypes.DEFAULT_TYPE):
         except ValueError:
             pass
 
+        # If still None, try matching username or first name
         if user_id is None:
             for uid in user_messages:
                 user = await context.bot.get_chat(uid)
@@ -159,20 +162,19 @@ async def send_kezdesu_message(bot, chat_id):
     hours = seconds // 3600
     minutes = (seconds % 3600) // 60
 
-    reply = f"Осталось {days} дней, {hours} часов и {minutes} минут до встречи с моей родственной душой (28 декабря)."
+    reply = f"Жаныммен кездескенше {days} күн, {hours} сағат {minutes} минут қалды."
     await bot.send_message(chat_id=chat_id, text=reply)
 
-# This job runs automatically at midnight everyday
 async def kezdesu_job(context: ContextTypes.DEFAULT_TYPE):
-    await send_kezdesu_message(context.bot, CHAT_ID)  # Send to known chat ID
+    await send_kezdesu_message(context.bot, CHAT_ID)
 
 def main():
     load_previous_messages()
     load_quotes()
 
+    # Build the application (no .jobs() since not supported in stable release)
     app = ApplicationBuilder().token(TOKEN).build()
 
-    # Handlers
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, message_handler))
     app.add_handler(CommandHandler('topmessages', top_messages))
     app.add_handler(CommandHandler('listusers', list_users))
@@ -180,11 +182,11 @@ def main():
     app.add_handler(CommandHandler('mylove', mylove))
     app.add_handler(CommandHandler('kezdesu', kezdesu))
 
-    # Schedule a job to run daily at 00:00 (midnight)
-    # You must ensure that the server time is correct.
-    # If you want to handle timezones, adjust accordingly.
-    job_queue = app.job_queue
-    job_queue.run_daily(kezdesu_job, time=time(0,0,0))  # midnight
+    # Create JobQueue manually and attach it to the app
+    job_queue = JobQueue()
+    job_queue.set_application(app)
+    job_queue.run_daily(kezdesu_job, time=time(0,0,0))
+    job_queue.start()
 
     app.run_polling()
 

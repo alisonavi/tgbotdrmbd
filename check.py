@@ -14,3 +14,9 @@ async def print_dialogs():
 
 with client:
     client.loop.run_until_complete(print_dialogs())
+#  reply = f"Жаныммен кездескенше {days} күн, {hours} сағат {minutes} минут қалды."
+
+
+# TOKEN = '7648682155:AAH47YWYgpSCIsxjpoA7aHB1Ic5Y0UDbmK8'
+
+# CHAT_ID = -1002374154188  # Replace with your target group chat ID
