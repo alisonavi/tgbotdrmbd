@@ -185,7 +185,7 @@ async def kezdesu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     seconds = delta.seconds
     hours = seconds // 3600
     minutes = (seconds % 3600) // 60
-    reply = f"Жаныммен кездескенше {days} күн, {hours} сағат {minutes} минут қалды."
+    reply = f"Жаныммен кездескенше {days} күн, {hours} сағат {minutes+1} минут қалды."
     await update.message.reply_text(reply)
 
 def fetch_random_joke():
