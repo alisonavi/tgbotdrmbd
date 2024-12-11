@@ -51,6 +51,9 @@ def load_quotes():
 
 async def message_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     message = update.message.text
+    if message.startswith('/'):
+        # It's a command, do not record it
+        return
     user_id = update.message.from_user.id
     user_messages[user_id].append(message)
     logging.info(f"Recorded message from user_id {user_id}")
