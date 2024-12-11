@@ -177,7 +177,7 @@ async def kezdesu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     current_year = now.year
 
     # Target date: December 28 of the current year
-    target_date = datetime(current_year, 12, 28)
+    target_date = datetime(current_year, 12, 29)
 
     # If the date has passed for this year, set the target to next year
     if target_date < now:
