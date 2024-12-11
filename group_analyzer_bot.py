@@ -59,6 +59,7 @@ async def message_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     logging.info(f"Recorded message from user_id {user_id}")
 
 async def get_most_frequent_messages(user_id):
+    # истелинши
     messages = [m for m in user_messages[user_id] if not m.startswith('/')]
     counter = Counter(messages)
     return counter.most_common(5)
