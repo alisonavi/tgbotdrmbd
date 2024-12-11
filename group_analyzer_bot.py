@@ -6,7 +6,8 @@ from datetime import datetime
 import requests
 from bs4 import BeautifulSoup
 import re
-
+from datetime import datetime
+from zoneinfo import ZoneInfo
 from telegram import Update
 from telegram.ext import (
     ApplicationBuilder,
@@ -173,9 +174,10 @@ async def mylove(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 # kezdesu command as before
 async def kezdesu(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    now = datetime.now()
+    user_tz = ZoneInfo("Asia/Oral")
+    now = datetime.now(tz=user_tz)
     current_year = now.year
-    target_date = datetime(current_year, 12, 29)
+    target_date = datetime(current_year, 12, 29, tzinfo=user_tz)
     if target_date < now:
         target_date = datetime(current_year + 1, 12, 28)
     delta = target_date - now
