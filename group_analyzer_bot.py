@@ -11,6 +11,9 @@ from telegram.ext import (
     filters,
 )
 from datetime import datetime, timedelta
+import requests
+from bs4 import BeautifulSoup
+import re
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -192,7 +195,27 @@ async def kezdesu(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     reply = f"Жаныммен кездескенше {days} күн, {hours-5} сағат {minutes} минут қалды."
     await update.message.reply_text(reply)
+async def joke(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    joke_text = fetch_random_joke()
+    await update.message.reply_text(joke_text)    
+def fetch_random_joke():
+    url = "https://www.anekdot.ru/random/story/"
+    response = requests.get(url)
+    response.raise_for_status()  # Ensure we got a successful response
 
+    soup = BeautifulSoup(response.text, 'html.parser')
+
+    # On anekdot.ru, jokes are often inside a <div class="text"> for stories.
+    # Let's find all divs with class "text" and pick the first one.
+    joke_div = soup.find('div', class_='text')
+    if joke_div:
+        # Extract text and strip extra whitespace
+        joke_text = joke_div.get_text(strip=True)
+        joke_text = joke_text.replace('\xa0', ' ')
+        joke_text = re.sub(r'\s+', ' ', joke_text).strip()
+        return joke_text
+    else:
+        return "Не удалось получить шутку."
 def main():
     # Load old messages from file
     load_previous_messages()
@@ -201,7 +224,8 @@ def main():
     load_quotes()
 
     app = ApplicationBuilder().token(TOKEN).build()
-
+    
+    
     # Handler to collect all text messages
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, message_handler))
 
@@ -211,7 +235,7 @@ def main():
     app.add_handler(CommandHandler('leaderboard', leaderboard))
     app.add_handler(CommandHandler('mylove', mylove))
     app.add_handler(CommandHandler('kezdesu', kezdesu))
-
+    app.add_handler(CommandHandler('joke', joke))
     # Start the bot
     app.run_polling()
 
